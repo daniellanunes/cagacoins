@@ -242,7 +242,7 @@ export default function HomeScreen({ navigation }: Props) {
               navigation.navigate("GameGallery");
             }}
           >
-            <PlayButtonText>Jogue então reina 🎮</PlayButtonText>
+            <PlayButtonText>Jogue enquanto reina 🎮</PlayButtonText>
           </PlayButton>
         )}
       </MainArea>
