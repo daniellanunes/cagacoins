@@ -1,6 +1,7 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Platform, StatusBar } from 'react-native';
 
 import LoginScreen from "../screens/Login";
 import RegisterScreen from "../screens/Register";
@@ -88,11 +89,14 @@ function AppStack() {
           headerShown: true, 
           title: "Galeria de Jogos",
           headerTintColor: "#3b2416",
-          headerStyle: { backgroundColor: "#fff5eb" } 
+          headerTitleAlign: 'center',
+          headerStyle: { backgroundColor: "#fff5eb" },
+          // Isso aqui resolve a invasão: empurra o header exatamente o tamanho da barra
+          headerStatusBarHeight: Platform.OS === 'android' ? StatusBar.currentHeight : undefined,
+          headerTopInsetEnabled: false,
         }}
       />
 
-      {/* Rota para o WebView do jogo selecionado */}
       <Stack.Screen
         name="GameView"
         component={GameViewScreen}
@@ -100,10 +104,13 @@ function AppStack() {
           headerShown: true, 
           title: route.params?.title || "Jogando...",
           headerTintColor: "#3b2416",
-          headerStyle: { backgroundColor: "#fff5eb" }
+          headerTitleAlign: 'center',
+          headerStyle: { backgroundColor: "#fff5eb" },
+          headerStatusBarHeight: Platform.OS === 'android' ? StatusBar.currentHeight : undefined,
+          headerTopInsetEnabled: false,
         })}
       />
-      
+            
     </Stack.Navigator>
   );
 }

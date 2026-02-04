@@ -1,14 +1,13 @@
-// Mudança crucial para resolver o erro ts(1259) da imagem
-import * as React from "react"; 
-import { useEffect, useState } from "react";
-import { StatusBar, StyleSheet, PermissionsAndroid, Platform } from "react-native";
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import React, { useState, useEffect } from 'react';
+import { StatusBar, Platform } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import RNBootSplash from "react-native-bootsplash";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
 import AppNavigator from "./src/navigation";
 import SplashAnimation from "./src/components/SplashAnimation";
 import { TimerProvider } from "./src/context/TimerContext";
+import { UpdateModal } from "./src/components/ModalUpdate";
 
 export default function App() {
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
@@ -17,13 +16,6 @@ export default function App() {
   const [animationFinished, setAnimationFinished] = useState(false);
 
   useEffect(() => {
-    const requestPermission = async () => {
-      if (Platform.OS === 'android' && Platform.Version >= 33) {
-        await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
-      }
-    };
-    requestPermission();
-
     const unsub = auth().onAuthStateChanged((u) => {
       setUser(u);
       const prepareApp = async () => {
@@ -47,18 +39,21 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <TimerProvider>
-        <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
-        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-          {renderContent()}
-        </SafeAreaView>
+        {/* Usando sua lógica funcional do outro projeto */}
+        <StatusBar 
+          barStyle="dark-content" 
+          backgroundColor="#fff5eb" 
+          translucent={false} 
+        /> 
+        
+        <UpdateModal />       
+        
+        {/* IMPORTANTE: Removi o SafeAreaView global daqui. 
+           Isso vai resolver o problema do Header invadindo ou sobrando margem.
+        */}
+        {renderContent()}
+
       </TimerProvider>
     </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F5EFE6", 
-  },
-});

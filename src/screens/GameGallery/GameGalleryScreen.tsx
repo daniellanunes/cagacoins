@@ -19,8 +19,8 @@ type Props = NativeStackScreenProps<RootStackParamList, "GameGallery">;
 
 export default function GameGalleryScreen({ navigation }: Props) {
   return (
-    <Container>
-      <FooterTitle style={{ fontSize: 24, marginBottom: 20 }}>Escolha seu entretenimento 🎮</FooterTitle>
+    <Container >
+      <FooterTitle style={{ fontSize: 24, marginBottom: 20, textAlign: 'center', }}>Escolha seu entretenimento 🎮</FooterTitle>
       
       <FlatList
         data={GAMES_LIST}

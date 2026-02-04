@@ -22,10 +22,10 @@ export const GAMES_LIST = [
   },
   {
     id: "4",
-    title: "Snake (Cobrinha)",
-    description: "Não bata na própria cauda!",
+    title: "Pac-Man",
+    description: "Come come!",
     url: "https://www.google.com/logos/2010/pacman10-i.html", // Versão arcade leve
-    icon: "hand-pointer",
+    icon: "ghost",
   },
   {
     id: "5",
@@ -34,4 +34,11 @@ export const GAMES_LIST = [
     url: "https://www.crazygames.com/br/game/tap-tap-shots", // Versão arcade leve
     icon: "basketball-ball",
   },
+  {
+    id: "6",
+    title: "Snake (Cobrinha)",
+    description: "Não bata na própria cauda!",
+    url: "https://www.google.com/fbx?fbx=snake_arcade&fbxga=1&hl=en&origin=www.google.com", 
+    icon: "bug", 
+  }
 ];
