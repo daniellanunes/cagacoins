@@ -4,7 +4,7 @@ export const Container = styled.View`
   flex: 1;
   padding: 12px;
   background-color: #fff5eb;
-  margin-bottom: 12px;
+  margin-bottom: 0px;
 `;
 
 export const Big = styled.Text`

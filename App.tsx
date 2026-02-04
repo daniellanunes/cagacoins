@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StatusBar, Platform } from 'react-native';
+import { StatusBar, Platform, PermissionsAndroid } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import RNBootSplash from "react-native-bootsplash";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
@@ -16,6 +16,13 @@ export default function App() {
   const [animationFinished, setAnimationFinished] = useState(false);
 
   useEffect(() => {
+    const requestPermission = async () => {
+      if (Platform.OS === 'android' && Platform.Version >= 33) {
+        await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+      }
+    };
+    requestPermission();
+
     const unsub = auth().onAuthStateChanged((u) => {
       setUser(u);
       const prepareApp = async () => {
