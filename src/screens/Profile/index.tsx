@@ -1,21 +1,18 @@
-/**
- * Profile Screen:
- * - Busca dados do usuário em /users/{uid} no Firestore
- * - Mostra nome, email, telefone
- * - Botão Sair (logoff)
- * - Botão Excluir conta (deleta Firestore + Auth)
- */
-
 import React, { useEffect, useState } from "react";
 import { Alert, ActivityIndicator } from "react-native";
 import auth from "@react-native-firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 
-import { getProfile, logout, deleteAccountCompletely, UserProfile } from "../../services/auth";
+import {
+  getProfile,
+  logout,
+  deleteAccountCompletely,
+  UserProfile,
+} from "../../services/auth";
+
 import {
   Container,
-  Title,
   Card,
   Label,
   Value,
@@ -23,7 +20,6 @@ import {
   ButtonText,
   SecondaryButton,
   SecondaryButtonText,
-  Hint,
   BackButton,
   HeaderBar,
   HeaderTitle,
@@ -34,22 +30,16 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const navigation = useNavigation<any>();
 
-
-  /**
-   * Carrega o perfil assim que a tela abre
-   */
   useEffect(() => {
     (async () => {
       try {
         const user = auth().currentUser;
 
-        // Se não tiver user, não deveria estar nessa tela
         if (!user) {
           setProfile(null);
           return;
         }
 
-        // Busca profile no Firestore
         const p = await getProfile(user.uid);
         setProfile(
           p ?? {
@@ -68,21 +58,18 @@ export default function ProfileScreen() {
     })();
   }, []);
 
-  /**
-   * Logout simples
-   */
+  /** ✅ Botão Sair: só desloga e vai pro Login */
   const onLogout = async () => {
     try {
+      setLoading(true);
       await logout();
     } finally {
-      // ✅ força voltar pro Login (mesmo se listener falhar)
+      setLoading(false);
       navigation.reset({ index: 0, routes: [{ name: "Login" }] });
     }
   };
 
-  /**
-   * Exclusão de conta com confirmação
-   */
+  /** ✅ Botão Excluir: exclui e só então manda pro Login */
   const onDeleteAccount = () => {
     Alert.alert(
       "Excluir conta",
@@ -96,25 +83,30 @@ export default function ProfileScreen() {
             try {
               setLoading(true);
 
+              // ✅ tenta deletar Firestore + Auth
               await deleteAccountCompletely();
 
-              // ✅ garante que sai do app mesmo se delete no Auth falhar parcialmente
+              // ✅ agora sim desloga (opcional, mas ajuda o app a resetar tudo)
               try {
                 await logout();
               } catch {}
 
+              // ✅ vai pro Login
               navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+
+              Alert.alert("Conta excluída", "Sua conta e histórico foram removidos.");
             } catch (e: any) {
               console.log("DELETE ACCOUNT ERROR =>", e?.code, e?.message, e);
 
-              if (String(e?.code || "").includes("auth/requires-recent-login")) {
+              if (e?.code === "auth/requires-recent-login") {
                 Alert.alert(
                   "Precisa confirmar o login",
-                  "Por segurança, faça login novamente e tente excluir a conta de novo."
+                  "Por segurança, faça login novamente e tente excluir de novo."
                 );
-              } else {
-                Alert.alert("Erro", "Não foi possível excluir a conta. Tente novamente.");
+                return;
               }
+
+              Alert.alert("Erro", "Não foi possível excluir a conta. Tente novamente.");
             } finally {
               setLoading(false);
             }
@@ -140,7 +132,8 @@ export default function ProfileScreen() {
         </BackButton>
 
         <HeaderTitle>Seu perfil 💩</HeaderTitle>
-      </HeaderBar>      
+      </HeaderBar>
+
       <Card>
         <Label>Nome</Label>
         <Value>{profile?.name ?? "-"}</Value>
@@ -150,22 +143,17 @@ export default function ProfileScreen() {
 
         <Label>Telefone</Label>
         <Value>{profile?.phone ?? "-"}</Value>
-
       </Card>
-      <Hint>
-       
-      </Hint>
-      {/* ✅ Botão Sair */}
+
+      {/* ✅ Sair */}
       <SecondaryButton onPress={onLogout}>
         <SecondaryButtonText>Sair da conta</SecondaryButtonText>
       </SecondaryButton>
 
-      {/* ✅ Botão Excluir */}
+      {/* ✅ Excluir */}
       <Button variant="danger" onPress={onDeleteAccount}>
         <ButtonText>Excluir conta</ButtonText>
       </Button>
-
-
     </Container>
   );
 }
