@@ -1,45 +1,21 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useEffect, useState } from "react";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import AppNavigator from "./src/navigation";
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+export default function App() {
+  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
+  const [ready, setReady] = useState(false);
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+  useEffect(() => {
+    const unsub = auth().onAuthStateChanged((u) => {
+      setUser(u);
+      setReady(true);
+    });
+    return unsub;
+  }, []);
 
-  return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
-  );
+  if (!ready) return null;
+
+  // ✅ Em vez de initialRouteName, passamos "isLogged"
+  return <AppNavigator isLogged={!!user} />;
 }
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
-
-export default App;
