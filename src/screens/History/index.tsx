@@ -50,9 +50,10 @@ function pad2(n: number) {
 }
 
 function toDate(ts: any): Date | null {
-  if (!ts) return null;
-  if (typeof ts?.toDate === "function") return ts.toDate(); // Firestore Timestamp
-  if (ts instanceof Date) return ts;
+  if (!ts) return new Date(); // Se for nulo (pendente), assume agora para não quebrar a lista
+  if (ts instanceof firestore.Timestamp) return ts.toDate();
+  if (typeof ts?.toDate === "function") return ts.toDate();
+  if (ts.seconds) return new Date(ts.seconds * 1000);
   return null;
 }
 

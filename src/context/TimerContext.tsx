@@ -18,6 +18,7 @@ const timerBackgroundPath = async (taskData: any) => {
     while (BackgroundJob.isRunning()) {
       await BackgroundJob.updateNotification({
         taskDesc: `O tempo é dinheiro! 💩`, 
+        
       });
       await new Promise((r) => setTimeout(r, 2000));
     }

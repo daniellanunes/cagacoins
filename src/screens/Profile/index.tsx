@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Alert, ActivityIndicator } from "react-native";
+import { ActivityIndicator } from "react-native";
 import auth from "@react-native-firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
@@ -10,6 +10,8 @@ import {
   deleteAccountCompletely,
   UserProfile,
 } from "../../services/auth";
+
+import CustomModal from "../../components/CustomModal";
 
 import {
   Container,
@@ -29,6 +31,31 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const navigation = useNavigation<any>();
+
+  // ✅ Estado unificado para o CustomModal
+  const [modal, setModal] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    type: "info" | "confirm" | "danger";
+    onConfirm?: () => void;
+  }>({
+    visible: false,
+    title: "",
+    message: "",
+    type: "info",
+  });
+
+  const hideModal = () => setModal((prev) => ({ ...prev, visible: false }));
+
+  const showModal = (
+    title: string,
+    message: string,
+    type: "info" | "confirm" | "danger" = "info",
+    onConfirm?: () => void
+  ) => {
+    setModal({ visible: true, title, message, type, onConfirm });
+  };
 
   useEffect(() => {
     (async () => {
@@ -58,68 +85,65 @@ export default function ProfileScreen() {
     })();
   }, []);
 
-  /** ✅ Botão Sair: só desloga e vai pro Login */
+  /** ✅ Sair da conta */
   const onLogout = async () => {
     try {
       setLoading(true);
       await logout();
+      navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+    } catch (e) {
+      showModal("Erro", "Não foi possível sair da conta.");
     } finally {
       setLoading(false);
-      navigation.reset({ index: 0, routes: [{ name: "Login" }] });
     }
   };
 
-  /** ✅ Botão Excluir: exclui e só então manda pro Login */
+  /** ✅ Execução real da exclusão */
+  const executeDelete = async () => {
+    hideModal();
+    setLoading(true);
+    try {
+      // 1. Tenta deletar Firestore + Auth
+      await deleteAccountCompletely();
+
+      // 2. Tenta deslogar para limpar estado do app
+      try {
+        await logout();
+      } catch {}
+
+      // 3. Reset de navegação
+      navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+    } catch (e: any) {
+      console.log("DELETE ACCOUNT ERROR =>", e?.code, e?.message, e);
+
+      if (e?.code === "auth/requires-recent-login") {
+        showModal(
+          "Precisa confirmar o login",
+          "Por segurança, faça login novamente e tente excluir de novo.",
+          "info"
+        );
+      } else {
+        showModal("Erro", "Não foi possível excluir a conta. Tente novamente.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /** ✅ Gatilho do Modal de Exclusão */
   const onDeleteAccount = () => {
-    Alert.alert(
+    showModal(
       "Excluir conta",
       "Isso vai apagar sua conta e seus dados. Essa ação não pode ser desfeita. Deseja continuar?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              setLoading(true);
-
-              // ✅ tenta deletar Firestore + Auth
-              await deleteAccountCompletely();
-
-              // ✅ agora sim desloga (opcional, mas ajuda o app a resetar tudo)
-              try {
-                await logout();
-              } catch {}
-
-              // ✅ vai pro Login
-              navigation.reset({ index: 0, routes: [{ name: "Login" }] });
-
-              Alert.alert("Conta excluída", "Sua conta e histórico foram removidos.");
-            } catch (e: any) {
-              console.log("DELETE ACCOUNT ERROR =>", e?.code, e?.message, e);
-
-              if (e?.code === "auth/requires-recent-login") {
-                Alert.alert(
-                  "Precisa confirmar o login",
-                  "Por segurança, faça login novamente e tente excluir de novo."
-                );
-                return;
-              }
-
-              Alert.alert("Erro", "Não foi possível excluir a conta. Tente novamente.");
-            } finally {
-              setLoading(false);
-            }
-          },
-        },
-      ]
+      "danger",
+      executeDelete
     );
   };
 
   if (loading) {
     return (
       <Container style={{ alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator />
+        <ActivityIndicator size="large" color="#3B2416" />
       </Container>
     );
   }
@@ -145,15 +169,23 @@ export default function ProfileScreen() {
         <Value>{profile?.phone ?? "-"}</Value>
       </Card>
 
-      {/* ✅ Sair */}
       <SecondaryButton onPress={onLogout}>
         <SecondaryButtonText>Sair da conta</SecondaryButtonText>
       </SecondaryButton>
 
-      {/* ✅ Excluir */}
       <Button variant="danger" onPress={onDeleteAccount}>
         <ButtonText>Excluir conta</ButtonText>
       </Button>
+
+      {/* ✅ Componente de Modal Único */}
+      <CustomModal
+        visible={modal.visible}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+        onClose={hideModal}
+        onConfirm={modal.onConfirm}
+      />
     </Container>
   );
 }

@@ -4,7 +4,6 @@ export const Container = styled.View`
   flex: 1;
   padding: 12px;
   background-color: #fff5eb;
-  margin-bottom: 0px;
 `;
 
 export const Big = styled.Text`
@@ -22,11 +21,58 @@ export const Money = styled.Text`
   text-align: center;
 `;
 
-// NOVO: Estilo da imagem do mascote
+export const CharacterContainer = styled.View`
+  width: 320px;
+  height: 320px;
+  margin-bottom: 1px;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+`;
+
 export const CharacterImage = styled.Image`
-  width: 220px;
-  height: 220px;
-  margin-bottom: 2px;
+  width: 320px;
+  height: 320px;
+`;
+
+export const GlassesOverlay = styled.Image`
+  position: absolute;
+  width: 35%; 
+  height: 45%;
+  top: 35%;
+  left: 31%;
+`;
+
+export const ChainOverlay = styled.Image`
+  position: absolute;
+  width: 40%;
+  height: 70%;
+  top: 35%;
+  left: 28%;
+`;
+
+export const PetOverlay = styled.Image`
+  position: absolute;
+  width: 70px;
+  height: 60px;
+  right: 10px;
+  bottom: 55px;
+`;
+
+export const PrivadaOverlay = styled.Image`
+  position: absolute;
+  width: 570px;
+  height: 150px;
+  right: 10px;
+  bottom: 55px;
+`;
+
+export const ClockOverlay = styled.Image`
+  position: absolute;
+  width: 30%;
+  height: 100%;
+  right: 10px;
+  bottom: 55px;
 `;
 
 export const MainArea = styled.View`
@@ -98,7 +144,6 @@ export const MenuText = styled.Text`
 export const Footer = styled.View`
   margin-top: auto;
   padding-top: 12px;
-  
 `;
 
 export const FooterTitle = styled.Text`
@@ -164,7 +209,12 @@ export const Coins = styled.Text`
   opacity: 0.9;
 `;
 
-// styles.ts
+export const CoinsHeader = styled.Text`
+  font-size: 18px;
+  font-weight: 900;
+  color: #3b2416;
+  opacity: 0.9;
+`;
 
 export const PlayButton = styled.Pressable`
   margin-top: 12px;
@@ -173,7 +223,7 @@ export const PlayButton = styled.Pressable`
   padding: 14px;
   border-radius: 20px;
   align-items: center;
-  background-color: #7a4a2e; /* Mesma cor do seu botão primário */
+  background-color: #7a4a2e;
   border-width: 2px;
   border-color: #e0c3a0;
   elevation: 2;

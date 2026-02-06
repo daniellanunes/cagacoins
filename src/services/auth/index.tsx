@@ -1,19 +1,21 @@
-/**
- * Serviços relacionados ao Auth e Profile (Firestore).
- * - Cadastro e Login (Firebase Auth)
- * - Perfil do usuário (Firestore /users/{uid})
- * - Logout
- * - Exclusão de conta (Firestore + Auth)
- */
-
 import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
 
+// ✅ Atualizado: Adicionado campos da loja e moedas
 export type UserProfile = {
   uid: string;
   name: string;
   email: string;
   phone: string;
+  totalCoins: number;
+  inventory: string[];
+  equipped: {
+    glasses: boolean;
+    chain: boolean;
+    pet: boolean;
+    privada: boolean; // Adicionado
+    clock: boolean;   // Adicionado
+  };
   createdAt?: any;
 };
 
@@ -54,12 +56,20 @@ export async function registerWithEmail(params: {
   const uid = res.user.uid;
 
   try {
+    // ✅ ATUALIZADO: Agora o set inclui a estrutura da loja
     await withTimeout(
       firestore().collection("users").doc(uid).set({
         uid,
         name: name.trim(),
         email: email.trim().toLowerCase(),
         phone: phone.trim(),
+        totalCoins: 0, // Começa com zero moedas
+        inventory: [], // Inventário vazio
+        equipped: {
+          glasses: false, // Nada equipado por padrão
+          chain: false,
+          pet: false,
+        },
         createdAt: firestore.FieldValue.serverTimestamp(),
       }),
       15000,
@@ -72,6 +82,7 @@ export async function registerWithEmail(params: {
   return res.user;
 }
 
+// ... restante das funções (loginWithEmail, getProfile, logout, deleteAccount) permanecem iguais
 export async function loginWithEmail(params: { email: string; password: string }) {
   const { email, password } = params;
   const res = await withTimeout(
@@ -87,28 +98,16 @@ export async function getProfile(uid: string) {
   return snap.exists ? (snap.data() as UserProfile) : null;
 }
 
-/** ✅ Logout simples */
 export async function logout() {
   await auth().signOut();
 }
 
-/**
- * ✅ Excluir conta completamente:
- * 1) deleta /users/{uid}/sessions (até 200)
- * 2) deleta /users/{uid}
- * 3) deleta usuário do Firebase Auth
- *
- * ⚠️ Importante:
- * - NÃO faz signOut aqui dentro.
- * - Se falhar, lança erro pra tela decidir o que fazer.
- */
 export async function deleteAccountCompletely() {
   const user = auth().currentUser;
   if (!user) throw new Error("NO_USER_LOGGED");
 
   const uid = user.uid;
 
-  // 1) sessions
   try {
     const sessionsSnap = await firestore()
       .collection("users")
@@ -126,14 +125,12 @@ export async function deleteAccountCompletely() {
     console.log("DELETE SESSIONS ERROR =>", err?.code, err?.message, err);
   }
 
-  // 2) doc principal
   try {
     await firestore().collection("users").doc(uid).delete();
   } catch (err: any) {
     console.log("DELETE USER DOC ERROR =>", err?.code, err?.message, err);
   }
 
-  // 3) Auth delete (pode exigir login recente)
   try {
     await user.delete();
   } catch (err: any) {

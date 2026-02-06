@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StatusBar, Platform, PermissionsAndroid } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StatusBar, Platform, PermissionsAndroid, View } from 'react-native';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import RNBootSplash from "react-native-bootsplash";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
@@ -37,30 +37,42 @@ export default function App() {
 
   const renderContent = () => {
     if (loading) return null;
+    
     if (showAnimation && !animationFinished) {
       return <SplashAnimation onFinish={() => setAnimationFinished(true)} />;
     }
-    return <AppNavigator isLogged={!!user} />;
+
+    return <AppContent user={user} />;
   };
 
   return (
-    <SafeAreaProvider>
-      <TimerProvider>
-        {/* Usando sua lógica funcional do outro projeto */}
-        <StatusBar 
-          barStyle="dark-content" 
-          backgroundColor="#fff5eb" 
-          translucent={false} 
-        /> 
-        
-        <UpdateModal />       
-        
-        {/* IMPORTANTE: Removi o SafeAreaView global daqui. 
-           Isso vai resolver o problema do Header invadindo ou sobrando margem.
-        */}
-        {renderContent()}
+      <SafeAreaProvider>
+        <TimerProvider>
+          <StatusBar 
+            barStyle="dark-content" 
+            backgroundColor="#fff5eb" 
+            translucent={true} // ✅ Mude para TRUE para o fundo vazar corretamente
+          /> 
+          <UpdateModal />       
+          {renderContent()}
+        </TimerProvider>
+      </SafeAreaProvider>
+    );
+  }
 
-      </TimerProvider>
-    </SafeAreaProvider>
-  );
-}
+  // ✅ Componente interno para usar o Hook de Insets
+  function AppContent({ user }: { user: any }) {
+    const insets = useSafeAreaInsets();
+
+    return (
+      <View style={{ 
+        flex: 1, 
+        backgroundColor: '#fff5eb',
+        // Aplica o padding apenas no topo e embaixo para não invadir as barras
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom 
+      }}>
+        <AppNavigator isLogged={!!user} />
+      </View>
+    );
+  }

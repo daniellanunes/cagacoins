@@ -11,6 +11,7 @@ import HomeScreen from "../screens/Home";
 import HistoryScreen from "../screens/History";
 import ProfileScreen from "../screens/Profile";
 import SessionDetail from "../screens/SessionDetail";
+import ShopScreen from "../screens/Shop";
 
 // Importações das novas telas de games
 import GameGalleryScreen from "../screens/GameGallery/GameGalleryScreen";
@@ -79,6 +80,10 @@ function AppStack() {
       <Stack.Screen
         name="SessionDetail"
         component={SessionDetail}
+      />
+      <Stack.Screen
+        name="ShopScreen"
+        component={ShopScreen}
       />
 
       {/* Rota para a lista de jogos */}
