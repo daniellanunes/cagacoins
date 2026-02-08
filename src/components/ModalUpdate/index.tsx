@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, Linking, Platform, Image } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
+// ✅ Importação modular (v22+)
+import { getRemoteConfig, setConfigSettings, fetchAndActivate, getValue } from '@react-native-firebase/remote-config';
 import { styles } from './styles'; 
 
 function isVersionLower(current: string, latest: string): boolean {
@@ -20,17 +22,28 @@ export function UpdateModal() {
 
   useEffect(() => {
     const checkVersion = async () => {
-    try {
-        await remoteConfig().fetchAndActivate();
-        const latestVersion = remoteConfig().getValue('latest_version').asString();
+      try {
+        // ✅ Obtém a instância do Remote Config
+        const remote = getRemoteConfig();
+
+        // ✅ Configura usando a nova sintaxe modular
+        await setConfigSettings(remote, {
+          minimumFetchIntervalMillis: 3600000, // 1 hora
+        });
+
+        // ✅ Busca e ativa
+        await fetchAndActivate(remote);
+        
+        // ✅ Pega o valor usando a nova função modular
+        const latestVersion = getValue(remote, 'latest_version').asString();
         const currentVersion = DeviceInfo.getVersion();
 
         if (latestVersion && isVersionLower(currentVersion, latestVersion)) {
-        setShowModal(true);
+          setShowModal(true);
         }
-    } catch (error) {
+      } catch (error) {
         console.log('Erro Remote Config:', error);
-    }
+      }
     };
 
     checkVersion();
@@ -39,8 +52,8 @@ export function UpdateModal() {
   const handleUpdate = () => {
     const storeUrl =
       Platform.OS === 'android'
-        ? 'https://play.google.com/store/apps/details?'
-        : 'https://apps.apple.com/br/app/';
+        ? 'https://play.google.com/store/apps/details?id=com.aoo.cagacoins'
+        : 'https://apps.apple.com/br/app/cagacoins'; 
     Linking.openURL(storeUrl);
   };
 

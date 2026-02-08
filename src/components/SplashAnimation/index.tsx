@@ -40,6 +40,7 @@ const SplashAnimation: React.FC<Props> = ({ onFinish }) => {
 
   return (
     <S.Container>
+    
       <Animated.Image
         source={require('../../assets/logo.png')}
         resizeMode="contain"

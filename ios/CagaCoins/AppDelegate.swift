@@ -2,6 +2,7 @@ import UIKit
 import React
 import React_RCTAppDelegate
 import ReactAppDependencyProvider
+import Firebase // ✅ O import padrão é apenas Firebase
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -14,15 +15,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
+    
+    // ✅ 1. Inicializa o Firebase
+    FirebaseApp.configure() 
+    
+    // ✅ 2. Configuração padrão do React Native 0.74+
     let delegate = ReactNativeDelegate()
     let factory = RCTReactNativeFactory(delegate: delegate)
     delegate.dependencyProvider = RCTAppDependencyProvider()
-
+    
     reactNativeDelegate = delegate
     reactNativeFactory = factory
 
     window = UIWindow(frame: UIScreen.main.bounds)
 
+    // ✅ 3. Garante que o ModuleName seja o mesmo do app.json
     factory.startReactNative(
       withModuleName: "CagaCoins",
       in: window,

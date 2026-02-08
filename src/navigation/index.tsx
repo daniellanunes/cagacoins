@@ -113,6 +113,7 @@ function AppStack() {
           headerStyle: { backgroundColor: "#fff5eb" },
           headerStatusBarHeight: Platform.OS === 'android' ? StatusBar.currentHeight : undefined,
           headerTopInsetEnabled: false,
+          gestureEnabled: false,
         })}
       />
             
